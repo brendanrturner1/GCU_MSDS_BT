@@ -1,30 +1,19 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 # Welcome! Please note this project may take some time run in its completeness. 
 # NOTE: You must have all the following packages installed. If not, run
 #       the scripts from the command line, like in the examples below:
 
-##pip install cfbd
-##pip install natsort
-##pip install PySimpleGUI
-
-
-# In[5]:
-
+##pip install cfbd pandas ...
 
 # Import packages
 import cfbd
-import datetime
 import numpy as np
 import pandas as pd
 from scipy.stats import percentileofscore
 import PySimpleGUI as sg
 import pandas as pd
-from natsort import index_natsorted
 from statistics import mean
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -40,9 +29,6 @@ teams_api = cfbd.TeamsApi(api_config)
 games_api = cfbd.GamesApi(api_config)
 drives_api = cfbd.DrivesApi(api_config)
 conferences_api = cfbd.ConferencesApi(api_config)
-
-
-# In[6]:
 
 
 # Get drive data
@@ -103,9 +89,6 @@ df['drive_result'] = df['drive_result'].replace('PASSING TD TD','PASSING TD')
 df['drive_result'] = df['drive_result'].replace('RUSHING TD TD','RUSHING TD')
 
 
-# In[8]:
-
-
 # Create database of conferences
 FBS_conf = ['Sun Belt','Conference USA','Western Athletic','Pac-12','Big 12','Mid-American',
             'Big Ten','American Athletic','Mountain West','SEC','FBS Independents','ACC']
@@ -143,10 +126,6 @@ pd.set_option("display.max_rows", None)
 for i in rank.itertuples():
     if i[1] in Power_teams:
         rank.loc[i[0],['Score']] = 1525
-
-
-# In[12]:
-
 
 # Model Formula
 
@@ -233,10 +212,6 @@ def elo(g):
     
     return c
 
-
-# In[13]:
-
-
 # Build games list
 games = []
 for i in df['game_id'].tolist():
@@ -255,12 +230,8 @@ for i in games:
         w=c+w
 
 
-# In[14]:
-
-
 # Sort Rankings by Updated Score
-
-rank = rank.sort_values(by='Score',key=lambda x: np.argsort(index_natsorted(rank['Score'],reverse=True)))
+rank = rank.sort_values(by='Score',axis=0,ascending=False)
 rank = rank.reset_index(drop=True)
 rank.index += 1
 
@@ -271,8 +242,6 @@ wins=100*round(w/len(games),2)
 rank2 = rank.to_csv("rank.csv")
 rank = pd.read_csv("rank.csv")
 
-
-# In[16]:
 
 
 # Define Box Score Formula
@@ -311,9 +280,6 @@ for j in games[-10:]:
     L.append([" ", " ", " "])
 test = pd.DataFrame(L,columns=['Team','Win %','Spread'])
 test.drop(test.tail(1).index,inplace=True)
-
-
-# In[18]:
 
 
 # Define GUI Functions
@@ -386,9 +352,7 @@ def user():
         event, values = window6.read()
         if event == sg.WIN_CLOSED or event == "Back":
             break
-            
 
-# In[22]:
 
 # Draw Plots function
 def draw(a,b,e,f):
@@ -462,8 +426,6 @@ def plots(df):
     window4.close()
 
 
-# In[23]:
-
 
 # Help tab
 def about(drives,w):
@@ -482,9 +444,6 @@ def about(drives,w):
             reports(drives,w)
     
     window7.close()
-
-
-# In[24]:
 
 
 # Generate Reports function
@@ -542,10 +501,6 @@ def reports(df,w):
     
     window9.close()
 
-
-# In[28]:
-
-
 # Define Main GUI
 def main(df,w,pred,drives):
     sg.theme('DarkGreen5')
@@ -571,9 +526,6 @@ def main(df,w,pred,drives):
             about(drives,w)
 
     win.close()
-
-
-# In[29]:
 
 
 main(rank,wins,test,df)
